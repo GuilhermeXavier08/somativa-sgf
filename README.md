@@ -65,7 +65,7 @@ O projeto consiste no desenvolvimento de um Sistema de Gestão de Frotas (SGF) n
 
 1. ### Classe
 - Usuario (Usuario)
-    - Atributos: id, nome, email, senha
+    - Atributos: id, nome, email, senha, função
     - Métodos: create, read, update, delete, login, logout
 
 - Veículo (Veiculo)
@@ -85,6 +85,7 @@ O projeto consiste no desenvolvimento de um Sistema de Gestão de Frotas (SGF) n
         +String nome
         +String email 
         +String senha
+        +Enum funcao
         +login()
         +logout()
         +CRUD()
@@ -110,7 +111,7 @@ O projeto consiste no desenvolvimento de um Sistema de Gestão de Frotas (SGF) n
         +CRUD
     }
 
-    Usuario "1"--"1" Viagem: "é Responsável por"
+    Usuario "1"--"1+" Viagem: "é Responsável por"
     Veiculo "1"--"1" Viagem: "associado a
 
 ```
@@ -177,5 +178,6 @@ graph TD
 ```
 
 ## Protótipos
+https://www.figma.com/design/mtyDxt1cI5tr4D9RFUyC1m/Untitled?node-id=0-1&t=6eoZT7DCJt9ZAXdK-1
 
 ## Codificação
