@@ -1,34 +1,23 @@
-// +String id
-//         +String marca
-//         +String modelo
-//         +boolean status
-//         +String placa
-//         +double quilometragem
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface IVeiculo extends Document {
   _id: string;
-  marca: string;
-  modelo: string;
   placa: string;
-  status: string;
-  numSerie: string;
+  modelo: string;
+  ano: number;
+  kmAtual: number;
+  kmUltimaManutencao: number;
 }
 
-const EquipSchema: Schema<IVeiculo> = new Schema({
-  marca: { type: String, required: true },
+const VeiculoSchema: Schema<IVeiculo> = new Schema({
+  placa: { type: String, required: true, unique: true },
   modelo: { type: String, required: true },
-  placa: { type: String, required: true },
-  numSerie: { type: String, required: true, unique: true },
-  status: {
-    type: String,
-    enum: ["ativo", "inativo", "manutencao"],
-    default: "ativo",
-  },
+  ano: { type: Number, required: true },
+  kmAtual: { type: Number, required: true, default: 0 },
+  kmUltimaManutencao: { type: Number, required: false, default: 0 },
 });
 
-const Equipamento: Model<IVeiculo> =
-  mongoose.models.Equipamento ||
-  mongoose.model<IVeiculo>("Equipamento", EquipSchema);
+const Veiculo: Model<IVeiculo> =
+  mongoose.models.Veiculo || mongoose.model<IVeiculo>("Veiculo", VeiculoSchema);
 
-export default Equipamento;
+export default Veiculo;
