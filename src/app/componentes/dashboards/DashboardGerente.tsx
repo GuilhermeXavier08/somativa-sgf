@@ -1,4 +1,4 @@
-// app/componentes/dashboards/DashboardGestor.tsx
+// src/app/componentes/dashboards/DashboardGerente.tsx
 "use client";
 
 import { IUsuario } from "@/models/Usuario";
@@ -8,7 +8,7 @@ import { useEffect, useState, FormEvent } from "react";
 
 type View = "VIAGENS" | "VEICULOS" | "MOTORISTAS" | "ALERTAS";
 
-export default function DashboardGestor() {
+export default function DashboardGerente() { // <-- CORRIGIDO AQUI
   const [view, setView] = useState<View>("VIAGENS");
 
   const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
@@ -16,12 +16,17 @@ export default function DashboardGestor() {
   const [viagens, setViagens] = useState<IViagem[]>([]);
   const [alertas, setAlertas] = useState<IVeiculo[]>([]);
 
+  // States para formulários
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [funcao, setFuncao] = useState("Motorista");
   const [placa, setPlaca] = useState("");
   const [modelo, setModelo] = useState("");
+  const [marca, setMarca] = useState("");
+  const [statusVeiculo, setStatusVeiculo] = useState<"OK" | "Em Manutenção">(
+    "OK"
+  );
   const [ano, setAno] = useState(new Date().getFullYear());
   const [kmAtual, setKmAtual] = useState(0);
   const [origem, setOrigem] = useState("");
@@ -40,32 +45,40 @@ export default function DashboardGestor() {
 
   useEffect(() => {
     const veiculosEmAlerta = veiculos.filter(
-      (v) => v.kmAtual - v.kmUltimaManutencao >= 10000
+      (v) => v.kmAtual - v.kmUltimaManutencao >= 10000 && v.status === "OK"
     );
     setAlertas(veiculosEmAlerta);
   }, [veiculos]);
 
   const fetchUsuarios = async () => {
     try {
-      const resposta = await fetch("/api/usuarios");
+      const resposta = await fetch("/api/usuarios", {
+        credentials: "include", 
+      });
       const data = await resposta.json();
       if (data.success) setUsuarios(data.data);
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
     }
   };
+
   const fetchVeiculos = async () => {
     try {
-      const resposta = await fetch("/api/veiculos");
+      const resposta = await fetch("/api/veiculos", {
+        credentials: "include", 
+      });
       const data = await resposta.json();
       if (data.success) setVeiculos(data.data);
-    } catch (error) {
+    } catch (error) { 
       console.error("Erro ao buscar veículos:", error);
     }
   };
+
   const fetchViagens = async () => {
     try {
-      const resposta = await fetch("/api/viagens");
+      const resposta = await fetch("/api/viagens", {
+        credentials: "include", 
+      });
       const data = await resposta.json();
       if (data.success) setViagens(data.data);
     } catch (error) {
@@ -82,6 +95,7 @@ export default function DashboardGestor() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome, email, senha, funcao }),
+        credentials: "include", 
       });
       const data = await resposta.json();
       if (data.success) {
@@ -108,19 +122,24 @@ export default function DashboardGestor() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           placa,
+          marca,
           modelo,
           ano,
           kmAtual,
+          status: statusVeiculo,
           kmUltimaManutencao: kmAtual,
         }),
+        credentials: "include", 
       });
       const data = await resposta.json();
       if (data.success) {
         setFormSuccess("Veículo cadastrado com sucesso!");
         setPlaca("");
+        setMarca("");
         setModelo("");
         setAno(new Date().getFullYear());
         setKmAtual(0);
+        setStatusVeiculo("OK");
         fetchVeiculos();
       } else {
         setFormError(data.error || "Erro ao cadastrar veículo.");
@@ -146,6 +165,7 @@ export default function DashboardGestor() {
           status: "Agendada",
           dataAgendada: new Date().toISOString(),
         }),
+        credentials: "include", 
       });
       const data = await resposta.json();
       if (data.success) {
@@ -175,7 +195,11 @@ export default function DashboardGestor() {
       const res = await fetch(`/api/veiculos/${veiculo._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kmUltimaManutencao: veiculo.kmAtual }),
+        body: JSON.stringify({
+          kmUltimaManutencao: veiculo.kmAtual,
+          status: "OK",
+        }),
+        credentials: "include", 
       });
       const data = await res.json();
       if (data.success) {
@@ -190,6 +214,64 @@ export default function DashboardGestor() {
     }
   };
 
+  const handleRemoverUsuario = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover este usuário?")) return;
+    try {
+      const res = await fetch(`/api/usuarios/${id}`, {
+        method: "DELETE",
+        credentials: "include", 
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Usuário removido!");
+        fetchUsuarios();
+      } else {
+        alert("Erro ao remover usuário: " + data.error);
+      }
+    } catch (error) {
+      alert("Erro de servidor.");
+    }
+  };
+
+  const handleRemoverVeiculo = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover este veículo?")) return;
+    try {
+      const res = await fetch(`/api/veiculos/${id}`, {
+        method: "DELETE",
+        credentials: "include", 
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Veículo removido!");
+        fetchVeiculos();
+      } else {
+        alert("Erro ao remover veículo: " + data.error);
+      }
+    } catch (error) {
+      alert("Erro de servidor.");
+    }
+  };
+
+  const handleCancelarViagem = async (id: string) => {
+    if (!confirm("Tem certeza que deseja cancelar esta viagem?")) return;
+    try {
+      const res = await fetch(`/api/viagens/${id}`, {
+        method: "DELETE",
+        credentials: "include", 
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Viagem cancelada!");
+        fetchViagens();
+      } else {
+        alert("Erro ao cancelar viagem: " + data.error);
+      }
+    } catch (error) {
+      alert("Erro de servidor.");
+    }
+  };
+
+  // --- RENDERIZAÇÃO ---
   const renderView = () => {
     switch (view) {
       case "ALERTAS":
@@ -213,16 +295,17 @@ export default function DashboardGestor() {
                 </thead>
                 <tbody>
                   {alertas.map((v) => (
-                    <tr key={v._id.toString()} style={{ backgroundColor: "#ffcccc" }}>
+                    <tr
+                      key={v._id.toString()}
+                      style={{ backgroundColor: "#ffcccc" }}
+                    >
                       <td>{v.placa}</td>
                       <td>{v.modelo}</td>
                       <td>{v.kmAtual} km</td>
                       <td>{v.kmUltimaManutencao} km</td>
                       <td>{v.kmAtual - v.kmUltimaManutencao} km</td>
                       <td>
-                        <button
-                          onClick={() => handleRegistrarManutencao(v)}
-                        >
+                        <button onClick={() => handleRegistrarManutencao(v)}>
                           Registrar Manutenção
                         </button>
                       </td>
@@ -262,7 +345,7 @@ export default function DashboardGestor() {
                 {usuarios
                   .filter((u) => u.funcao === "Motorista")
                   .map((u) => (
-                    <option key={u._id.toString()} value={u._id.toString()}> {/* <-- CORRIGIDO AQUI */}
+                    <option key={u._id.toString()} value={u._id.toString()}>
                       {u.nome}
                     </option>
                   ))}
@@ -273,11 +356,13 @@ export default function DashboardGestor() {
                 required
               >
                 <option value="">Selecione um Veículo</option>
-                {veiculos.map((v) => (
-                  <option key={v._id.toString()} value={v._id.toString()}> {/* <-- CORRIGIDO AQUI */}
-                    {v.placa} ({v.modelo})
-                  </option>
-                ))}
+                {veiculos
+                  .filter((v) => v.status === "OK") // Só mostra veículos disponíveis
+                  .map((v) => (
+                    <option key={v._id.toString()} value={v._id.toString()}>
+                      {v.placa} ({v.modelo})
+                    </option>
+                  ))}
               </select>
               <button type="submit">Agendar Viagem</button>
             </form>
@@ -292,18 +377,28 @@ export default function DashboardGestor() {
                   <th>Destino</th>
                   <th>Motorista</th>
                   <th>Veículo</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {viagens.map((v: any) => (
-                  <tr key={v._id.toString()}>
-                    <td>{v.status}</td>
-                    <td>{v.origem}</td>
-                    <td>{v.destino}</td>
-                    <td>{v.idMotorista?.nome || "N/A"}</td>
-                    <td>{v.idVeiculo?.placa || "N/A"}</td>
-                  </tr>
-                ))}
+                {viagens
+                  .filter((v) => v.status !== "Finalizada") // Não mostra viagens finalizadas
+                  .map((v: any) => (
+                    <tr key={v._id.toString()}>
+                      <td>{v.status}</td>
+                      <td>{v.origem}</td>
+                      <td>{v.destino}</td>
+                      <td>{v.idMotorista?.nome || "N/A"}</td>
+                      <td>{v.idVeiculo?.placa || "N/A"}</td>
+                      <td>
+                        <button
+                          onClick={() => handleCancelarViagem(v._id.toString())}
+                        >
+                          Cancelar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -319,6 +414,13 @@ export default function DashboardGestor() {
                 placeholder="Placa"
                 value={placa}
                 onChange={(e) => setPlaca(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Marca"
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
                 required
               />
               <input
@@ -342,6 +444,15 @@ export default function DashboardGestor() {
                 onChange={(e) => setKmAtual(parseFloat(e.target.value))}
                 required
               />
+              <select
+                value={statusVeiculo}
+                onChange={(e) =>
+                  setStatusVeiculo(e.target.value as "OK" | "Em Manutenção")
+                }
+              >
+                <option value="OK">OK (Disponível)</option>
+                <option value="Em Manutenção">Em Manutenção</option>
+              </select>
               <button type="submit">Cadastrar Veículo</button>
             </form>
 
@@ -351,20 +462,35 @@ export default function DashboardGestor() {
               <thead>
                 <tr>
                   <th>Placa</th>
+                  <th>Marca</th>
                   <th>Modelo</th>
                   <th>Ano</th>
                   <th>KM Atual</th>
                   <th>KM Últ. Manutenção</th>
+                  <th>Status</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {veiculos.map((v) => (
                   <tr key={v._id.toString()}>
                     <td>{v.placa}</td>
+                    <td>{v.marca}</td>
                     <td>{v.modelo}</td>
                     <td>{v.ano}</td>
                     <td>{v.kmAtual}</td>
                     <td>{v.kmUltimaManutencao}</td>
+                    <td style={{ color: v.status === "OK" ? "green" : "red" }}>
+                      {v.status}
+                    </td>
+                    <td>
+                      <button style={{ marginRight: "5px" }}>Editar</button>
+                      <button
+                        onClick={() => handleRemoverVeiculo(v._id.toString())}
+                      >
+                        Remover
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -416,6 +542,7 @@ export default function DashboardGestor() {
                   <th>Nome</th>
                   <th>Email</th>
                   <th>Função</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -424,6 +551,16 @@ export default function DashboardGestor() {
                     <td>{usuario.nome}</td>
                     <td>{usuario.email}</td>
                     <td>{usuario.funcao}</td>
+                    <td>
+                      <button style={{ marginRight: "5px" }}>Editar</button>
+                      <button
+                        onClick={() =>
+                          handleRemoverUsuario(usuario._id.toString())
+                        }
+                      >
+                        Remover
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
