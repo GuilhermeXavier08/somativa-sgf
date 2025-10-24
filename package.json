@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "init-gestor": "npx ts-node -r dotenv/config src/app/scripts/initGestor.ts",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -10,8 +11,12 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "mongoose": "^8.19.2",
     "next": "15.5.5",
+    "next-auth": "^4.24.11",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

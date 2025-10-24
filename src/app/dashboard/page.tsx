@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import DashboardMotorista from "../componentes/dashboards/DashboardMotorista";
-import DashboardGestor from "../componentes/dashboards/DashboardGestor";
+import DashboardMotorista from "@/app/componentes/dashboards/DashboardMotorista";
+import DashboardGestor from "@/app/componentes/dashboards/DashboardGerente";
 
 export default function DashboardPage() {
   const route = useRouter();

@@ -213,7 +213,7 @@ export default function DashboardGestor() {
                 </thead>
                 <tbody>
                   {alertas.map((v) => (
-                    <tr key={v._id} style={{ backgroundColor: "#ffcccc" }}>
+                    <tr key={v._id.toString()} style={{ backgroundColor: "#ffcccc" }}>
                       <td>{v.placa}</td>
                       <td>{v.modelo}</td>
                       <td>{v.kmAtual} km</td>
@@ -262,7 +262,7 @@ export default function DashboardGestor() {
                 {usuarios
                   .filter((u) => u.funcao === "Motorista")
                   .map((u) => (
-                    <option key={u._id} value={u._id}>
+                    <option key={u._id.toString()} value={u._id.toString()}> {/* <-- CORRIGIDO AQUI */}
                       {u.nome}
                     </option>
                   ))}
@@ -274,7 +274,7 @@ export default function DashboardGestor() {
               >
                 <option value="">Selecione um Veículo</option>
                 {veiculos.map((v) => (
-                  <option key={v._id} value={v._id}>
+                  <option key={v._id.toString()} value={v._id.toString()}> {/* <-- CORRIGIDO AQUI */}
                     {v.placa} ({v.modelo})
                   </option>
                 ))}
@@ -296,7 +296,7 @@ export default function DashboardGestor() {
               </thead>
               <tbody>
                 {viagens.map((v: any) => (
-                  <tr key={v._id}>
+                  <tr key={v._id.toString()}>
                     <td>{v.status}</td>
                     <td>{v.origem}</td>
                     <td>{v.destino}</td>
@@ -359,7 +359,7 @@ export default function DashboardGestor() {
               </thead>
               <tbody>
                 {veiculos.map((v) => (
-                  <tr key={v._id}>
+                  <tr key={v._id.toString()}>
                     <td>{v.placa}</td>
                     <td>{v.modelo}</td>
                     <td>{v.ano}</td>
@@ -420,7 +420,7 @@ export default function DashboardGestor() {
               </thead>
               <tbody>
                 {usuarios.map((usuario) => (
-                  <tr key={usuario._id}>
+                  <tr key={usuario._id.toString()}>
                     <td>{usuario.nome}</td>
                     <td>{usuario.email}</td>
                     <td>{usuario.funcao}</td>
